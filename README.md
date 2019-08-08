@@ -2,10 +2,11 @@
 
 ## 插件状态: Alpha
 
-
 ###怎么安装插件？
-在IDEA中 使用 `maven install` 命令即可把maven插件安装到本地仓库中
-> 
+1.在IDEA中 使用 `maven install` 命令即可把maven插件安装到本地仓库中
+
+2.然后 插件会自动安装到maven仓库硬盘地址 `.m2\repository` 目录下
+
 ###怎么使用插件？
 在开发项目中 **pom.xml** 文件中引用
 
