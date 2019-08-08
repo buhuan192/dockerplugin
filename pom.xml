@@ -18,7 +18,7 @@
     </build>
     <groupId>com.talkweb.plugin</groupId>
     <artifactId>dockercmd-maven-plugin</artifactId>
-    <version>1.1.2</version>
+    <version>1.1.4</version>
    <dependencies>
        <dependency>
            <groupId>com.spotify</groupId>
