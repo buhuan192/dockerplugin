@@ -1,6 +1,7 @@
 #Dockcmd-maven-plugin
 
 ## 插件状态: Alpha
+当前阶段本插件尚未加入到Maven公开仓库，所以只支持本地引用模式
 
 ###怎么安装插件？
 1.在IDEA中 使用 `maven install` 命令即可把maven插件安装到本地仓库中
@@ -34,3 +35,12 @@
 `<remote_HTTPSAPI>` docker服务远程API接口地址（目前仅支持https加密访问）
 
 `<completetag>` 镜像的完整标签（TAG）
+
+###注意事项
+>1.TAG带有URL验证：只支持域名URL（不支持带端口号）只能包含小写, 数字, '-', '_' , '.'和':'
+
+>2.本插件无需设置环境变量DOCKER_HOST，只支持自定义remote_HTTPSAPI参数
+
+>3.容器启动默认绑定IP：0.0.0.0，请悉知
+
+>4.如有其他功能需要或者BUG请联系作者
