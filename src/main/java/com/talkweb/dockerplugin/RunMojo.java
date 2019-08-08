@@ -95,7 +95,7 @@ public class RunMojo extends AbstractMojo {
     }
 
     private DockerClient openDockerClient() throws MojoExecutionException  {
-        String caPath =System.getProperty("user.home").replaceAll("\\\\","\\\\\\\\")+".docker\\";
+        String caPath =System.getProperty("user.home").replaceAll("\\\\","\\\\\\\\")+"\\.docker\\";
         try {
 
             return DefaultDockerClient.fromEnv().uri(URI.create(remote_HTTPSAPI))
