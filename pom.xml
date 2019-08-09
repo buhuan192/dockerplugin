@@ -5,6 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>maven-plugin</packaging>
     <build>
+        <defaultGoal>compile</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -25,7 +26,8 @@
     </build>
     <groupId>com.talkweb.plugin</groupId>
     <artifactId>dockercmd-maven-plugin</artifactId>
-    <version>1.1.7</version>
+    <version>1.1.9</version>
+
    <dependencies>
        <dependency>
            <groupId>com.spotify</groupId>

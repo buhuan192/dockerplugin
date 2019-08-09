@@ -10,6 +10,7 @@ import com.spotify.docker.client.messages.*;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -37,11 +38,16 @@ public class RunMojo extends AbstractMojo {
     @Parameter(property = "dockerplugin.host_ports")
     String host_ports ;
     //标签
-    @Parameter(property = "dockerplugin.tag")
+    @Parameter(property = "dockerplugin.completetag")
     String completetag;
     //远程API地址
-    @Parameter(property = "dockerplugin.privaterepository")
+    @Parameter(property = "dockerplugin.remote_HTTPSAPI")
     String remote_HTTPSAPI;
+
+    final Log log = getLog();
+
+    private static final String VALID_REPO_REGEX = "^([a-z0-9_.:-])+(\\/[a-z0-9_.:-]+)*$";
+
     @Override
     public void execute() throws MojoExecutionException,MojoFailureException {
         DockerClient dc = openDockerClient();
@@ -57,8 +63,7 @@ public class RunMojo extends AbstractMojo {
         final HostConfig hostConfig = HostConfig.builder().portBindings(portBindings).build();
         if (!validateRepository(completetag)) {
             throw new MojoFailureException(
-                    "标签名称\""
-                            + completetag
+                    "标签名称\"" + completetag
                             + "\" 只能是 小写, 数字, '-', '_' , '.'和':'");
         }
         // Create container with exposed ports
@@ -71,27 +76,51 @@ public class RunMojo extends AbstractMojo {
 
         final ContainerCreation creation;
         try {
-
+            //停止占有该端口的相关容器
+            StopContainer(dc);
             creation = dc.createContainer(containerConfig);
             final String id = creation.id();
-
             //启动容器
             dc.startContainer(id);
-            System.out.println("容器启动成功！");
+            log.info("新容器启动成功！");
         } catch ( InterruptedException|DockerException e ) {
-            throw new MojoExecutionException("容器启动失败！", e);
+            throw new MojoExecutionException("新容器启动失败！", e);
         }
 
         dc.close();
         return;
     }
 
-    private static final String VALID_REPO_REGEX = "^([a-z0-9_.:-])+(\\/[a-z0-9_.:-]+)*$";
 
+    /*
+    * 校验URL的合法性
+    *
+    * */
     @VisibleForTesting
     static boolean validateRepository(@Nonnull String repository) {
         Pattern pattern = Pattern.compile(VALID_REPO_REGEX);
         return pattern.matcher(repository).matches();
+    }
+
+    private void StopContainer(DockerClient dc) throws MojoExecutionException
+    {
+        try {
+            //DockerClient.ListContainersParam lc = DockerClient.ListContainersParam.filter("publish",container_ports+"/"+host_ports);
+            final List<Container> containers = dc.listContainers(DockerClient.ListContainersParam.withStatusRunning());
+
+            for (Container x : containers) {
+                try {
+                    if (x.ports().get(0).publicPort().toString().equals(host_ports) && x.ports().get(0).privatePort().toString().equals(container_ports)) {
+                        dc.stopContainer(x.id(), 1);
+                        log.info("已成功停止映射端口["+container_ports+":"+host_ports+"]的容器"+containers.size()+"个！");
+                    }
+                } catch (DockerException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (DockerException|InterruptedException e) {
+            throw new MojoExecutionException("停止容器操作失败！",e);
+        }
     }
 
     private DockerClient openDockerClient() throws MojoExecutionException  {
