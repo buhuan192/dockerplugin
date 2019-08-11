@@ -46,6 +46,7 @@ public class RunMojo extends AbstractMojo {
 
     final Log log = getLog();
 
+    //URL验证规则
     private static final String VALID_REPO_REGEX = "^([a-z0-9_.:-])+(\\/[a-z0-9_.:-]+)*$";
 
     @Override
@@ -66,7 +67,8 @@ public class RunMojo extends AbstractMojo {
                     "标签名称\"" + completetag
                             + "\" 只能是 小写, 数字, '-', '_' , '.'和':'");
         }
-        // Create container with exposed ports
+
+        // 创建容器
         final ContainerConfig containerConfig = ContainerConfig.builder()
                 .hostConfig(hostConfig)
                 .image(completetag).exposedPorts(ports)
@@ -102,6 +104,9 @@ public class RunMojo extends AbstractMojo {
         return pattern.matcher(repository).matches();
     }
 
+    /*
+    * 停止docker容器
+    * */
     private void StopContainer(DockerClient dc) throws MojoExecutionException
     {
         try {
@@ -123,10 +128,13 @@ public class RunMojo extends AbstractMojo {
         }
     }
 
+    /*
+     * 建立远程连接
+     * */
     private DockerClient openDockerClient() throws MojoExecutionException  {
+        //docker TLS证书保存路径
         String caPath =System.getProperty("user.home").replaceAll("\\\\","\\\\\\\\")+"\\.docker\\";
         try {
-
             return DefaultDockerClient.fromEnv().uri(URI.create(remote_HTTPSAPI))
                     .dockerCertificates(new DockerCertificates(Paths.get(caPath)))
                     .build();
